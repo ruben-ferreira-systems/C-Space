@@ -1,4 +1,23 @@
-## Sessão X – DD/MM/AAAA
+## Sessão 1 – 18/05/2026
+
+**Funcionalidades implementadas:**
+- ...
+- ...
+
+**Maior dificuldade:**
+...
+
+**Como resolvi (ou não resolvi):**
+...
+
+**Próximo passo planeado:**
+...
+
+**Linhas de código escritas (estimativa):**
+...
+
+
+## Sessão 2 – 20/05/2026
 
 **Funcionalidades implementadas:**
 - ...
