@@ -226,65 +226,51 @@ void IA_gerir_boss(Boss *b, Player *p, int offset, Projétil tiros_ini[], int ni
     }
 }
 
-void desenhar_boss(Boss *b, int offset, int nivel_atual)
-{
-    int x_absoluto = b->x + offset; // Ajuste para o scroll do ecrã
+void desenhar_boss(Boss *b, int offset, int nivel_atual) {
+    // Para evitar avisos de variável não usada se não precisares do offset aqui
+    (void)offset; 
 
-    switch (nivel_atual)
-    {
-    case 0:
-    case 1:
-        mvprintw(b->y - 1, x_absoluto, "[X]");
-        mvprintw(b->y, x_absoluto, "<O>");
-        mvprintw(b->y + 1, x_absoluto, "[X]");
-        break;
+    switch (nivel_atual) {
+        case 0:
+        case 1: // --- NÍVEL 1 E 2 ---
+            mvprintw(b->y - 1, b->x, "[X]");
+            mvprintw(b->y,     b->x, "<O>");
+            mvprintw(b->y + 1, b->x, "[X]");
+            break;
 
-    case 2: // NÍVEL 3 COMPACTO DE 150 HP
-    default:
-    {
-        // 1. LINHA SUPERIOR: Destrói-se quando a vida cai abaixo de 100
-        if (b->vida > 100)
-        {
-            mvprintw(b->y - 1, x_absoluto, "[X]");
-        }
-        else
-        {
-            mvprintw(b->y - 1, x_absoluto, (offset % 2 == 0) ? " * " : " ; ");
-        }
-
-        // 2. LINHA CENTRAL: Núcleo reativo
-        if (b->fase_atual == 1)
-        {
-            mvprintw(b->y, x_absoluto, "<O>");
-        }
-        else
-        {
-            if (estado_ia == 1)
-            {
-                mvprintw(b->y, x_absoluto, "<█>"); // Laser ativo
+        case 2: // --- NÍVEL 3 (150 HP UNIFICADOS) ---
+        default: {
+            // 1. LINHA SUPERIOR: Destrói-se quando a vida cai abaixo de 100
+            if (b->vida > 100) {
+                mvprintw(b->y - 1, b->x, "[X]");
+            } else {
+                // Se destruída, mostra faíscas retro intermitentes baseadas no offset global
+                mvprintw(b->y - 1, b->x, (offset % 2 == 0) ? " * " : " ; ");
             }
-            else if (estado_ia == 0 && offset % 2 == 0)
-            {
-                mvprintw(b->y, x_absoluto, "<- "); // Carregando laser
-            }
-            else
-            {
-                mvprintw(b->y, x_absoluto, "<O>");
-            }
-        }
 
-        // 3. LINHA INFERIOR: Destrói-se quando a vida cai abaixo de 50
-        if (b->vida > 50)
-        {
-            mvprintw(b->y + 1, x_absoluto, "[X]");
-        }
-        else
-        {
-            mvprintw(b->y + 1, x_absoluto, (offset % 2 == 0) ? " ; " : " * ");
-        }
-        {
+            // 2. LINHA CENTRAL: Núcleo reativo
+            if (b->fase_atual == 1) {
+                mvprintw(b->y, b->x, "<O>");
+            } else {
+                // Na Fase 2, o núcleo reage ao estado do Mega Laser
+                if (estado_ia == 1) {
+                    mvprintw(b->y, b->x, "<█>"); // Laser ativo
+                } else if (estado_ia == 0 && offset % 2 == 0) {
+                    mvprintw(b->y, b->x, "<- "); // Carregando/Mira
+                } else {
+                    mvprintw(b->y, b->x, "<O>");
+                }
+            }
+
+            // 3. LINHA INFERIOR: Destrói-se quando a vida cai abaixo de 50
+            if (b->vida > 50) {
+                mvprintw(b->y + 1, b->x, "[X]");
+            } else {
+                mvprintw(b->y + 1, b->x, (offset % 2 == 0) ? " ; " : " * ");
+            }
             break;
         }
     }
-    }
 }
+
+
