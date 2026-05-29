@@ -378,52 +378,69 @@ void update_game(Player *p, char mapa[ALTURA_TELA][LARGURA_MAPA], int offset, Bo
                             b->vida--;
                             if (som_ativo)
                             {
-                                system("play -q -n synth 0.03 sine 1500 vol 0.20 > /dev/null 2>&1 &");
+                                (void)system("play -q -n synth 0.03 sine 1500 vol 0.20 > /dev/null 2>&1 &");
                             }
                         }
                     }
-                    // NÍVEL 3: Mesma área 3x3, mas fracionada por componente biológico/mecânico
+                    // NÍVEL 3: Mesma área 3x3, mas fracionada por componentes baseados na vida global (150 HP)
                     else if (nivel_atual == 2)
                     {
-                        // FASE 1: DESARMAMENTO
+                        // FASE 1: DESARMAMENTO (Vida global entre 150 e 51)
                         if (b->fase_atual == 1)
                         {
-                            if (ty == b->y - 1 && b->hp_arma_superior > 0)
+                            // Braço Superior: Só recebe dano se a vida global for maior que 100
+                            if (ty == b->y - 1 && b->vida > 100)
                             {
-                                b->hp_arma_superior--;
                                 b->vida--;
                                 p->tiro[i].ativo = 0;
                                 p->pontuacao += 20;
+                                if (som_ativo)
+                                {
+                                    (void)system("play -q -n synth 0.03 sine 1500 vol 0.20 > /dev/null 2>&1 &");
+                                }
                                 continue;
                             }
-                            else if (ty == b->y + 1 && b->hp_arma_inferior > 0)
+                            // Braço Inferior: Só recebe dano se a vida global for maior que 50
+                            else if (ty == b->y + 1 && b->vida > 50)
                             {
-                                b->hp_arma_inferior--;
                                 b->vida--;
                                 p->tiro[i].ativo = 0;
                                 p->pontuacao += 20;
+                                if (som_ativo)
+                                {
+                                    (void)system("play -q -n synth 0.03 sine 1500 vol 0.20 > /dev/null 2>&1 &");
+                                }
                                 continue;
                             }
+                            // O núcleo central absorve o tiro sem sofrer dano enquanto os braços existirem
                             else if (ty == b->y)
                             {
-                                p->tiro[i].ativo = 0; // O núcleo central absorve o tiro sem sofrer dano
+                                p->tiro[i].ativo = 0;
                                 continue;
                             }
                         }
-                        // FASE 2: FÚRIA DO NÚCLEO CENTRAL
+                        // FASE 2: FÚRIA DO NÚCLEO CENTRAL (Vida global <= 50)
                         else if (b->fase_atual == 2)
                         {
-                            if (ty == b->y && b->hp_nucleo > 0)
+                            // Na Fase 2, o ponto vulnerável é estritamente a linha central Y
+                            if (ty == b->y && b->vida > 0)
                             {
-                                b->hp_nucleo--;
                                 b->vida--;
                                 p->tiro[i].ativo = 0;
                                 p->pontuacao += 50;
+                                if (som_ativo)
+                                {
+                                    (void)system("play -q -n synth 0.03 sine 1800 vol 0.25 > /dev/null 2>&1 &");
+                                }
 
-                                if (b->hp_nucleo <= 0)
+                                if (b->vida <= 0)
                                 {
                                     b->ativo = 2; // Vitória absoluta!
                                     p->pontuacao += 500000;
+                                    if (som_ativo)
+                                    {
+                                        (void)system("play -q -n synth 0.80 brownnoise synth 0.80 sine 300:40 vol 0.45 > /dev/null 2>&1 &");
+                                    }
                                 }
                                 continue;
                             }
@@ -431,7 +448,7 @@ void update_game(Player *p, char mapa[ALTURA_TELA][LARGURA_MAPA], int offset, Bo
                     }
                 }
 
-                // Finalização de dano para os Níveis 1 e 2
+                // Finalização de dano exclusiva para os Níveis 1 e 2
                 if (atingiu_boss && (nivel_atual == 0 || nivel_atual == 1))
                 {
                     p->tiro[i].ativo = 0;
@@ -442,7 +459,7 @@ void update_game(Player *p, char mapa[ALTURA_TELA][LARGURA_MAPA], int offset, Bo
                         p->pontuacao += 100000;
                         if (som_ativo)
                         {
-                            system("play -q -n synth 0.80 brownnoise synth 0.80 sine 300:40 vol 0.45 > /dev/null 2>&1 &");
+                            (void)system("play -q -n synth 0.80 brownnoise synth 0.80 sine 300:40 vol 0.45 > /dev/null 2>&1 &");
                         }
                     }
                     continue;
