@@ -33,8 +33,8 @@ void IA_gerir_boss(Boss *b, Player *p, int offset, Projétil tiros_ini[], int ni
     {
         if (nivel_atual == 2)
         {
-            b->vida = 150;      // Fixado nos 150 HP lineares para o Nível 3
-            b->fase_atual = 1;  // Começa na Fase de Desarmamento
+            b->vida = 150;     // Fixado nos 150 HP lineares para o Nível 3
+            b->fase_atual = 1; // Começa na Fase de Desarmamento
         }
         vida_inicial_combate = b->vida;
     }
@@ -49,8 +49,10 @@ void IA_gerir_boss(Boss *b, Player *p, int offset, Projétil tiros_ini[], int ni
                 boss_frame_count = 0;
                 b->y += b->direcao_y;
                 b->x += b->direcao_x;
-                if (b->y - 2 < 0 || b->y + 2 >= ALTURA_TELA) b->direcao_y *= -1;
-                if (b->x < LARGURA_TELA / 2 || b->x > LARGURA_TELA - 5) b->direcao_x *= -1;
+                if (b->y - 2 < 0 || b->y + 2 >= ALTURA_TELA)
+                    b->direcao_y *= -1;
+                if (b->x < LARGURA_TELA / 2 || b->x > LARGURA_TELA - 5)
+                    b->direcao_x *= -1;
             }
         }
         else
@@ -64,16 +66,22 @@ void IA_gerir_boss(Boss *b, Player *p, int offset, Projétil tiros_ini[], int ni
                     alvo_fixado_x = p->x;
                     alvo_fixado_y = p->y;
                     estado_ia = 1;
-                    if (som_ativo) (void)system("play -q -n synth 0.15 sine 300:900 vol 0.35 > /dev/null 2>&1 &");
+                    if (som_ativo)
+                        (void)system("play -q -n synth 0.15 sine 300:900 vol 0.35 > /dev/null 2>&1 &");
                 }
                 else if (estado_ia == 1)
                 {
-                    if (b->x < alvo_fixado_x) b->x++;
-                    else if (b->x > alvo_fixado_x) b->x--;
-                    if (b->y < alvo_fixado_y) b->y++;
-                    else if (b->y > alvo_fixado_y) b->y--;
-                    
-                    if ((b->x == alvo_fixado_x && b->y == alvo_fixado_y) || b->x <= 1) estado_ia = 2;
+                    if (b->x < alvo_fixado_x)
+                        b->x++;
+                    else if (b->x > alvo_fixado_x)
+                        b->x--;
+                    if (b->y < alvo_fixado_y)
+                        b->y++;
+                    else if (b->y > alvo_fixado_y)
+                        b->y--;
+
+                    if ((b->x == alvo_fixado_x && b->y == alvo_fixado_y) || b->x <= 1)
+                        estado_ia = 2;
                 }
                 else if (estado_ia == 2)
                 {
@@ -81,8 +89,10 @@ void IA_gerir_boss(Boss *b, Player *p, int offset, Projétil tiros_ini[], int ni
                     {
                         b->x++;
                         b->y += (rand() % 3) - 1;
-                        if (b->y - 2 < 0) b->y = 2;
-                        if (b->y + 2 >= ALTURA_TELA) b->y = ALTURA_TELA - 3;
+                        if (b->y - 2 < 0)
+                            b->y = 2;
+                        if (b->y + 2 >= ALTURA_TELA)
+                            b->y = ALTURA_TELA - 3;
                     }
                     else
                     {
@@ -112,7 +122,8 @@ void IA_gerir_boss(Boss *b, Player *p, int offset, Projétil tiros_ini[], int ni
                             break;
                         }
                     }
-                    if (tiros_criados >= 3) break;
+                    if (tiros_criados >= 3)
+                        break;
                 }
             }
             else
@@ -140,50 +151,115 @@ void IA_gerir_boss(Boss *b, Player *p, int offset, Projétil tiros_ini[], int ni
         if (b->fase_atual == 1 && b->vida <= 50)
         {
             b->fase_atual = 2;
-            estado_ia = 0; 
+            b->vida = 150;
+            estado_ia = 0;
             boss_frame_count = 0;
             laser_timer = 0;
+
+            if (som_ativo)
+                (void)system("play -q -n synth 0.50 sine 100:600 vol 0.4 > /dev/null 2>&1 &");
         }
 
         // --- FASE 1: DESARMAMENTO (Vida de 150 a 51) ---
         if (b->fase_atual == 1)
         {
-            if (boss_frame_count >= 3)
+            // COMPORTAMENTO A: Se não sofreu dano recente, faz Ricochete + Chuva de Tiros
+            if (b->vida == vida_inicial_combate)
             {
-                boss_frame_count = 0;
-                b->y += b->direcao_y;
-                b->x += b->direcao_x;
-                if (b->y - 2 < 0 || b->y + 2 >= ALTURA_TELA) b->direcao_y *= -1;
-                if (b->x < LARGURA_TELA / 2 || b->x > LARGURA_TELA - 8) b->direcao_x *= -1;
-            }
-
-            boss_tiro_timer++;
-            if (boss_tiro_timer >= 12)
-            {
-                boss_tiro_timer = 0;
-
-                int arma_superior_viva = (b->vida > 100);
-                int arma_inferior_viva = (b->vida > 50);
-                int configs_tiro[3][2] = {{arma_superior_viva, -1}, {1, 0}, {arma_inferior_viva, 1}};
-
-                for (int t = 0; t < 3; t++)
+                if (boss_frame_count >= 3)
                 {
-                    if (configs_tiro[t][0] > 0)
+                    boss_frame_count = 0;
+                    b->y += b->direcao_y;
+                    b->x += b->direcao_x;
+                    if (b->y - 2 < 0 || b->y + 2 >= ALTURA_TELA)
+                        b->direcao_y *= -1;
+                    if (b->x < LARGURA_TELA / 2 || b->x > LARGURA_TELA - 8)
+                        b->direcao_x *= -1;
+                }
+
+                boss_tiro_timer++;
+                if (boss_tiro_timer >= 12)
+                {
+                    boss_tiro_timer = 0;
+
+                    int arma_superior_viva = (b->vida > 100);
+                    int arma_inferior_viva = (b->vida > 50);
+                    int configs_tiro[3][2] = {{arma_superior_viva, -1}, {1, 0}, {arma_inferior_viva, 1}};
+
+                    for (int t = 0; t < 3; t++)
                     {
-                        for (int i = 0; i < MAX_TIROS_INIMIGO; i++)
+                        if (configs_tiro[t][0] > 0)
                         {
-                            if (tiros_ini[i].ativo == 0)
+                            for (int i = 0; i < MAX_TIROS_INIMIGO; i++)
                             {
-                                tiros_ini[i].x = b->x - 1 + offset;
-                                tiros_ini[i].y = b->y + configs_tiro[t][1];
-                                tiros_ini[i].ativo = 1;
-                                break;
+                                if (tiros_ini[i].ativo == 0)
+                                {
+                                    tiros_ini[i].x = b->x - 1 + offset;
+                                    tiros_ini[i].y = b->y + configs_tiro[t][1];
+                                    tiros_ini[i].ativo = 1;
+                                    break;
+                                }
                             }
                         }
                     }
                 }
             }
+            // COMPORTAMENTO B: Levou dano! Ativa imediatamente a investida diagonal do MODO TOURO
+            else
+            {
+                int velocidade_corte = (estado_ia == 1) ? 1 : 3;
+                if (boss_frame_count >= velocidade_corte)
+                {
+                    boss_frame_count = 0;
+
+                    // ESTADO 0: Trava a mira na posição atual do Jogador
+                    if (estado_ia == 0)
+                    {
+                        alvo_fixado_x = p->x;
+                        alvo_fixado_y = p->y;
+                        estado_ia = 1;
+                        if (som_ativo)
+                        {
+                            (void)system("play -q -n synth 0.15 sine 300:900 vol 0.35 > /dev/null 2>&1 &");
+                        }
+                    }
+                    // ESTADO 1: Investida rápida em perseguição diagonal
+                    else if (estado_ia == 1)
+                    {
+                        if (b->x < alvo_fixado_x)
+                            b->x++;
+                        else if (b->x > alvo_fixado_x)
+                            b->x--;
+
+                        if (b->y < alvo_fixado_y)
+                            b->y++;
+                        else if (b->y > alvo_fixado_y)
+                            b->y--;
+
+                        if ((b->x == alvo_fixado_x && b->y == alvo_fixado_y) || b->x <= 2)
+                        {
+                            estado_ia = 2; // Falhou ou atingiu o alvo: inicia o recuo
+                        }
+                    }
+                    // ESTADO 2: Recuo controlado de regresso à ala direita da arena
+                    else if (estado_ia == 2)
+                    {
+                        if (b->x < LARGURA_TELA - 10)
+                        {
+                            b->x++;
+                        }
+                        else
+                        {
+                            // Chegou à base seguro: acalma e estabiliza a nova vida de referência
+                            b->x = LARGURA_TELA - 10;
+                            estado_ia = 0;
+                            vida_inicial_combate = b->vida;
+                        }
+                    }
+                }
+            }
         }
+
         // --- FASE 2: FÚRIA DO MEGA LASER E INVESTIDA (Vida de 50 a 1) ---
         else if (b->fase_atual == 2)
         {
@@ -193,8 +269,10 @@ void IA_gerir_boss(Boss *b, Player *p, int offset, Projétil tiros_ini[], int ni
                 if (boss_frame_count >= 2)
                 {
                     boss_frame_count = 0;
-                    if (b->y < p->y && b->y < ALTURA_TELA - 3) b->y++;
-                    else if (b->y > p->y && b->y > 2) b->y--;
+                    if (b->y < p->y && b->y < ALTURA_TELA - 3)
+                        b->y++;
+                    else if (b->y > p->y && b->y > 2)
+                        b->y--;
                 }
 
                 laser_timer++;
@@ -208,18 +286,20 @@ void IA_gerir_boss(Boss *b, Player *p, int offset, Projétil tiros_ini[], int ni
                     laser_timer = 0;
                     alvo_fixado_y = b->y; // Tranca o Y do laser
                     estado_ia = 1;
-                    if (som_ativo) (void)system("play -q -n synth 0.60 square 150 vol 0.35 > /dev/null 2>&1 &");
+                    if (som_ativo)
+                        (void)system("play -q -n synth 0.60 square 150 vol 0.35 > /dev/null 2>&1 &");
                 }
             }
             // ESTADO 1: Ativação do Mega Laser
             else if (estado_ia == 1)
             {
                 laser_timer++;
-                
+
                 // Desenha o laser de forma segura na matriz física temporária para colisão imediata
                 for (int x_laser = offset + 1; x_laser < b->x + offset; x_laser++)
                 {
-                    if (x_laser < LARGURA_MAPA) mapa[alvo_fixado_y][x_laser] = '=';
+                    if (x_laser < LARGURA_MAPA)
+                        mapa[alvo_fixado_y][x_laser] = '=';
                 }
 
                 if (laser_timer >= 35) // Dura 1 segundo ativo
@@ -228,11 +308,13 @@ void IA_gerir_boss(Boss *b, Player *p, int offset, Projétil tiros_ini[], int ni
                     // Limpa do mapa para libertar a investida física
                     for (int x_laser = offset + 1; x_laser < b->x + offset; x_laser++)
                     {
-                        if (x_laser < LARGURA_MAPA && mapa[alvo_fixado_y][x_laser] == '=') mapa[alvo_fixado_y][x_laser] = ' ';
+                        if (x_laser < LARGURA_MAPA && mapa[alvo_fixado_y][x_laser] == '=')
+                            mapa[alvo_fixado_y][x_laser] = ' ';
                     }
                     alvo_fixado_x = p->x; // Guarda posição horizontal do jogador para o Touro
                     estado_ia = 2;
-                    if (som_ativo) (void)system("play -q -n synth 0.20 sine 400:1200 vol 0.35 > /dev/null 2>&1 &");
+                    if (som_ativo)
+                        (void)system("play -q -n synth 0.20 sine 400:1200 vol 0.35 > /dev/null 2>&1 &");
                 }
             }
             // ESTADO 2: Investida Rápida (Modo Touro) à esquerda
@@ -241,8 +323,9 @@ void IA_gerir_boss(Boss *b, Player *p, int offset, Projétil tiros_ini[], int ni
                 if (boss_frame_count >= 1)
                 {
                     boss_frame_count = 0;
-                    b->x--; 
-                    if (b->x <= alvo_fixado_x || b->x <= 2) estado_ia = 3;
+                    b->x--;
+                    if (b->x <= alvo_fixado_x || b->x <= 2)
+                        estado_ia = 3;
                 }
             }
             // ESTADO 3: Recuo Lento e Vulnerável para a direita
@@ -261,56 +344,77 @@ void IA_gerir_boss(Boss *b, Player *p, int offset, Projétil tiros_ini[], int ni
             }
         }
 
-        if (b->vida <= 0) b->ativo = 2; // Estado Derrotado
+        if (b->vida <= 0)
+            b->ativo = 2; // Estado Derrotado
     }
 }
 
+void desenhar_boss(Boss *b, int offset, int nivel_atual)
+{
+    (void)offset;
 
-void desenhar_boss(Boss *b, int offset, int nivel_atual) {
-    // Para evitar avisos de variável não usada se não precisares do offset aqui
-    (void)offset; 
+    // Cria um contador estático interno apenas para controlar o tempo da animação
+    static int anim_frame = 0;
+    anim_frame++;
 
-    switch (nivel_atual) {
-        case 0:
-        case 1: // --- NÍVEL 1 E 2 ---
+    // Alterna os caracteres a cada 6 frames para a piscadela ser bem visível (~180ms)
+    int pisca = ((anim_frame / 6) % 2 == 0);
+
+    switch (nivel_atual)
+    {
+    case 0:
+    case 1: // --- NÍVEL 1 E 2 ---
+        mvprintw(b->y - 1, b->x, "[X]");
+        mvprintw(b->y, b->x, "<O>");
+        mvprintw(b->y + 1, b->x, "[X]");
+        break;
+
+    case 2: // --- NÍVEL 3 (150 HP UNIFICADOS COM RESET) ---
+    default:
+    {
+        // 1. LINHA SUPERIOR: Só existe se estiver na Fase 1 E com vida acima de 100
+        if (b->fase_atual == 1 && b->vida > 100)
+        {
             mvprintw(b->y - 1, b->x, "[X]");
-            mvprintw(b->y,     b->x, "<O>");
-            mvprintw(b->y + 1, b->x, "[X]");
-            break;
-
-        case 2: // --- NÍVEL 3 (150 HP UNIFICADOS) ---
-        default: {
-            // 1. LINHA SUPERIOR: Destrói-se quando a vida cai abaixo de 100
-            if (b->vida > 100) {
-                mvprintw(b->y - 1, b->x, "[X]");
-            } else {
-                // Se destruída, mostra faíscas retro intermitentes baseadas no offset global
-                mvprintw(b->y - 1, b->x, (offset % 2 == 0) ? " * " : " ; ");
-            }
-
-            // 2. LINHA CENTRAL: Núcleo reativo
-            if (b->fase_atual == 1) {
-                mvprintw(b->y, b->x, "<O>");
-            } else {
-                // Na Fase 2, o núcleo reage ao estado do Mega Laser
-                if (estado_ia == 1) {
-                    mvprintw(b->y, b->x, "<█>"); // Laser ativo
-                } else if (estado_ia == 0 && offset % 2 == 0) {
-                    mvprintw(b->y, b->x, "<- "); // Carregando/Mira
-                } else {
-                    mvprintw(b->y, b->x, "<O>");
-                }
-            }
-
-            // 3. LINHA INFERIOR: Destrói-se quando a vida cai abaixo de 50
-            if (b->vida > 50) {
-                mvprintw(b->y + 1, b->x, "[X]");
-            } else {
-                mvprintw(b->y + 1, b->x, (offset % 2 == 0) ? " ; " : " * ");
-            }
-            break;
         }
+        else
+        {
+            // Faíscas limpas com espaços nas pontas para não borrar o ecrã
+            mvprintw(b->y - 1, b->x, pisca ? " * " : " ; ");
+        }
+
+        // 2. LINHA CENTRAL: Núcleo reativo
+        if (b->fase_atual == 1)
+        {
+            mvprintw(b->y, b->x, "<O>");
+        }
+        else
+        {
+            // Na Fase 2, o núcleo reage ao estado do Mega Laser
+            if (estado_ia == 1)
+            {
+                mvprintw(b->y, b->x, "<█>"); // Laser ativo
+            }
+            else if (estado_ia == 0 && pisca)
+            {
+                mvprintw(b->y, b->x, "<- "); // Carregando/Mira (Pisca visível)
+            }
+            else
+            {
+                mvprintw(b->y, b->x, "<O>");
+            }
+        }
+
+        // 3. LINHA INFERIOR: Só existe se estiver na Fase 1 E com vida acima de 50
+        if (b->fase_atual == 1 && b->vida > 50)
+        {
+            mvprintw(b->y + 1, b->x, "[X]");
+        }
+        else
+        {
+            mvprintw(b->y + 1, b->x, pisca ? " ; " : " * ");
+        }
+        break;
+    }
     }
 }
-
-

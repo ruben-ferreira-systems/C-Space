@@ -224,6 +224,32 @@ void update_game(Player *p, char mapa[ALTURA_TELA][LARGURA_MAPA], int offset, Bo
     if (p->imunidade > 0)
         p->imunidade--;
 
+    if (nivel_atual == 2 && b->ativo == 1 && b->fase_atual == 2 && p->imunidade <= 0)
+    {
+        // Converte a posição X da tela do jogador para a coordenada real da matriz do mapa
+        int jogador_mapa_x = p->x + offset;
+
+        // Verifica se a nave está dentro dos limites da matriz e por cima do caractere do laser
+        if (jogador_mapa_x >= 0 && jogador_mapa_x < LARGURA_MAPA)
+        {
+            if (mapa[p->y][jogador_mapa_x] == '=')
+            {
+                p->vidas--;        // Remove uma vida das 9 máximas
+                p->imunidade = 40; // Concede ~1.2 segundos de imunidade para evitar morte instantânea
+
+                // Força o reposicionamento da nave recuando 2 blocos para dar feedback visual de impacto
+                p->x -= 2;
+                if (p->x < 2)
+                    p->x = 2; // Margem de segurança esquerda
+
+                if (som_ativo)
+                {
+                    (void)system("play -q -n synth 0.35 brownnoise synth 0.35 sine 120 vol 0.40 > /dev/null 2>&1 &");
+                }
+            }
+        }
+    }
+
     // --- 1. INTELIGENCIA DOS INIMIGOS 'x' NO TUNEL ---
     if (nivel_atual >= 1 && b->ativo == 0)
     {
