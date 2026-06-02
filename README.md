@@ -98,3 +98,5 @@ It later grew into a complete playable game.
 ---
 
 Developed as a tribute to early handheld gaming and terminal-based programming.
+
+<img width="333" height="273" alt="image" src="https://github.com/user-attachments/assets/75d178f6-27d0-4f60-866f-c2f40c339214" />
